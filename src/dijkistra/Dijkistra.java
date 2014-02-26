@@ -22,8 +22,8 @@ public class Dijkistra {
 	public static void main(String args[]) {
 
 		Dijkistra dijkistra = new Dijkistra();
-		String sourceId = dataReader.findNearestVertexIdFromGPS("-87.62379438629151","41.86817599193286");
-		String targetId = dataReader.findNearestVertexIdFromGPS("-87.61808664550782","41.8825875604996");
+		String sourceId = dataReader.findNearestVertexIdFromGPS("-87.62383730163575","41.86792032502022");
+		String targetId = dataReader.findNearestVertexIdFromGPS("-87.61718542327881","41.878625501921995");
 		// sourceId = "7";
 		// targetId = "595";
 		List<Vertex> shortestPath = dijkistra.findShortestPath(sourceId, targetId);
