@@ -20,24 +20,28 @@ public class Dijkistra {
 	static Graph graph = dataReader.readDataAndLoadGraph();
 
 	public static void main(String args[]) {
-		
-		
-		Dijkistra dijkistra = new Dijkistra();		
-		String sourceId = dataReader.findNearestVertexIdFromGPS("-87.61348666733814","41.81979003424629");
-		String targetId = dataReader.findNearestVertexIdFromGPS("-87.60825099534107","41.83916848240636");
-		//sourceId = "7";
-		//targetId = "595";
+
+		Dijkistra dijkistra = new Dijkistra();
+		String sourceId = dataReader.findNearestVertexIdFromGPS("-87.62379438629151","41.86817599193286");
+		String targetId = dataReader.findNearestVertexIdFromGPS("-87.61808664550782","41.8825875604996");
+		// sourceId = "7";
+		// targetId = "595";
 		List<Vertex> shortestPath = dijkistra.findShortestPath(sourceId, targetId);
 		for (Vertex vertex : shortestPath) {
-			String query = "select the_geom from activity_linestrings_edge_table_noded where id = " + vertex.getId();
-			List<Point> points = dataReader.getResultForQuery(query);
+//			String query = "select the_geom from activity_linestrings_edge_table_noded where id = "
+//					+ vertex.getRecordId();
+			String query = "select the_geom from activity_linestrings_edge_table_noded_vertices_pgr where id = "
+					+ vertex.getId();
+			
+			List<Point> points = dataReader.getResultForQueryFromPoint(query);
 			dijkistra.printPathForBingMap(points);
 		}
 	}
 
 	private void printPathForBingMap(List<Point> points) {
 		for (Point point : points) {
-			System.out.println("points.push(\"" + point.getY() + "," + point.getX() + "\");");
+			 System.out.println("points.push(\"" + point.getY() + "," +
+			 point.getX() + "\");");
 		}
 	}
 
@@ -78,8 +82,8 @@ public class Dijkistra {
 		Vertex currentVertex = target;
 		while (currentVertex != null) {
 			result.add(currentVertex);
-			System.out.print(currentVertex.getId() + " -- ("
-					+ String.valueOf(currentVertex.getCostFromSource()).substring(0,5) + ")-->");
+			System.out.print(currentVertex.getId() + " -- (" + String.valueOf(currentVertex.getCostFromSource())
+					+ ")-->");
 			currentVertex = currentVertex.getParentVertexToSource();
 		}
 		System.out.println("\n");

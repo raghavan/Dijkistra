@@ -10,7 +10,8 @@ public interface DataReader {
 
 	public Graph readDataAndLoadGraph();
 
-	public List<Point> getResultForQuery(String query);
+	public List<Point> getResultForQueryFromLineString(String query);
+	public List<Point> getResultForQueryFromPoint(String query);
 
 	public String findNearestVertexIdFromGPS(String longitude, String latitude);
 }

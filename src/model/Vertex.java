@@ -1,8 +1,6 @@
 package model;
 
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 public class Vertex {
@@ -11,11 +9,13 @@ public class Vertex {
 
 	}
 
-	public Vertex(String id) {
+	public Vertex(long recordId,String id) {
 		super();
+		this.recordId = recordId;
 		this.id = id;
 	}
 
+	long recordId;
 	String id;
 	Set<Edge> edges = new HashSet<Edge>();
 	double costFromSource = 0.0;
@@ -56,6 +56,15 @@ public class Vertex {
 
 	public void setParentVertexToSource(Vertex parentVertexToSource) {
 		this.parentVertexToSource = parentVertexToSource;
+	}
+	
+	
+	public long getRecordId() {
+		return recordId;
+	}
+
+	public void setRecordId(long recordId) {
+		this.recordId = recordId;
 	}
 
 	@Override

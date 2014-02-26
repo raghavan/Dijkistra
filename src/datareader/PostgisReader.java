@@ -29,7 +29,7 @@ public class PostgisReader implements DataReader {
 	public Graph postGisDbReader() {
 		Graph graph = new Graph();
 
-		String query = "select source,target,cost_length from activity_linestrings_edge_table_noded where source != target;";
+		String query = "select id,source,target,cost_length from activity_linestrings_edge_table_noded where source != target;";
 		try {
 			getResultForQueryAndLoadValuesInGraph(graph, query);
 		} catch (SQLException e) {
@@ -59,7 +59,7 @@ public class PostgisReader implements DataReader {
 		return vertexId;
 	}
 
-	public List<Point> getResultForQuery(String query) {
+	public List<Point> getResultForQueryFromLineString(String query) {
 		List<Point> points = new ArrayList<Point>();
 		try {
 			Statement stmt = PostGisDBConnect.getConnection().createStatement();
@@ -80,26 +80,47 @@ public class PostgisReader implements DataReader {
 		return points;
 	}
 
+	public List<Point> getResultForQueryFromPoint(String query) {
+		List<Point> points = new ArrayList<Point>();
+		Point point = null;
+		try {
+			Statement stmt = PostGisDBConnect.getConnection().createStatement();
+			ResultSet r = stmt.executeQuery(query);
+			if (r != null) {
+				while (r.next()) {
+					PGgeometry geom = (PGgeometry) r.getObject(1);
+					point = (Point) geom.getGeometry();
+				}
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		points.add(point);
+
+		return points;
+	}
+
 	private void getResultForQueryAndLoadValuesInGraph(Graph graph, String query) throws SQLException {
 		Statement stmt = PostGisDBConnect.getConnection().createStatement();
 		ResultSet r = stmt.executeQuery(query);
 		while (r.next()) {
-			long source = (long) r.getObject(1);
-			long target = (long) r.getObject(2);
-			double cost = (double) r.getObject(3);
-			loadValuesIntoGraph(graph, String.valueOf(source), String.valueOf(target), cost);
+			long id = (long) r.getObject(1);
+			long source = (long) r.getObject(2);
+			long target = (long) r.getObject(3);
+			double cost = (double) r.getObject(4);
+			loadValuesIntoGraph(graph, id, String.valueOf(source), String.valueOf(target), cost);
 		}
 	}
 
-	private void loadValuesIntoGraph(Graph graph, String sourceId, String targetId, double cost) {
+	private void loadValuesIntoGraph(Graph graph, long recordid, String sourceId, String targetId, double cost) {
 		Vertex source = graph.getVertex(sourceId);
 		Vertex target = graph.getVertex(targetId);
 		if (source == null) {
-			source = new Vertex(sourceId);
+			source = new Vertex(recordid, sourceId);
 			graph.addVertex(source);
 		}
 		if (target == null) {
-			target = new Vertex(targetId);
+			target = new Vertex(recordid, targetId);
 			graph.addVertex(target);
 		}
 		Edge edge = new Edge(target, cost);

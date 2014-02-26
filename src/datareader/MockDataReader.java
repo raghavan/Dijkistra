@@ -56,10 +56,14 @@ public class MockDataReader implements DataReader {
 
 	}
 
-	public List<Point> getResultForQuery(String query){
+	public List<Point> getResultForQueryFromLineString(String query){
 		return null;
 	}
 
+	public List<Point> getResultForQueryFromPoint(String query){
+		return null;
+	}
+	
 	public String findNearestVertexIdFromGPS(String longitude, String latitude) {
 		return null;
 	}
