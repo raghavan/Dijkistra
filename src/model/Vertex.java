@@ -9,17 +9,16 @@ public class Vertex {
 
 	}
 
-	public Vertex(long recordId,String id) {
+	public Vertex(String id) {
 		super();
-		this.recordId = recordId;
 		this.id = id;
 	}
 
-	long recordId;
 	String id;
 	Set<Edge> edges = new HashSet<Edge>();
-	double costFromSource = 0.0;
+	double costFromSource = Double.MAX_VALUE;
 	Vertex parentVertexToSource;
+	Edge parentEdge;
 
 	public String getId() {
 		return id;
@@ -58,13 +57,12 @@ public class Vertex {
 		this.parentVertexToSource = parentVertexToSource;
 	}
 	
-	
-	public long getRecordId() {
-		return recordId;
+	public void setParentEdge(Edge e){
+		this.parentEdge = e;
 	}
-
-	public void setRecordId(long recordId) {
-		this.recordId = recordId;
+	
+	public Edge getParentEdge(){
+		return parentEdge;
 	}
 
 	@Override

@@ -12,10 +12,14 @@ public class PostGisDBConnect {
 	private PostGisDBConnect() {
 		try {
 			Class.forName("org.postgresql.Driver");
+//			String url = "jdbc:postgresql://purposefullab:5432/runkeeper_chicago";
+//			conn = DriverManager.getConnection(url, "postgres", "postgres");
 			String url = "jdbc:postgresql://localhost:5432/runkeeper_test";
 			conn = DriverManager.getConnection(url, "postgres", "");
 			((org.postgresql.PGConnection) conn).addDataType("geometry", Class.forName("org.postgis.PGgeometry"));
 			((org.postgresql.PGConnection) conn).addDataType("box3d", Class.forName("org.postgis.PGbox3d"));
+			
+			//System.out.println("Connected...");
 
 		} catch (ClassNotFoundException cnfErr) {
 			cnfErr.printStackTrace();

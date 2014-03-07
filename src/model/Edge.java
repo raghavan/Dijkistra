@@ -3,15 +3,17 @@ package model;
 public class Edge {
 
 	double cost;
-	Vertex vertex;
+	Vertex targetVertex;
+	long id;
 
 	public Edge() {
 
 	}
 
-	public Edge(Vertex vertex, double cost) {
+	public Edge(long id, Vertex vertex, double cost) {
 		this.cost = cost;
-		this.vertex = vertex;
+		this.targetVertex = vertex;
+		this.id = id;
 	}
 
 	public double getCost() {
@@ -23,11 +25,15 @@ public class Edge {
 	}
 
 	public Vertex getVertex() {
-		return vertex;
+		return targetVertex;
 	}
 
 	public void setVertex(Vertex vertex) {
-		this.vertex = vertex;
+		this.targetVertex = vertex;
+	}
+	
+	public long getId(){
+		return id;
 	}
 
 	@Override
@@ -37,7 +43,7 @@ public class Edge {
 		long temp;
 		temp = Double.doubleToLongBits(cost);
 		result = prime * result + (int) (temp ^ (temp >>> 32));
-		result = prime * result + ((vertex == null) ? 0 : vertex.hashCode());
+		result = prime * result + ((targetVertex == null) ? 0 : targetVertex.hashCode());
 		return result;
 	}
 
@@ -52,10 +58,10 @@ public class Edge {
 		Edge other = (Edge) obj;
 		if (Double.doubleToLongBits(cost) != Double.doubleToLongBits(other.cost))
 			return false;
-		if (vertex == null) {
-			if (other.vertex != null)
+		if (targetVertex == null) {
+			if (other.targetVertex != null)
 				return false;
-		} else if (!vertex.equals(other.vertex))
+		} else if (!targetVertex.equals(other.targetVertex))
 			return false;
 		return true;
 	}

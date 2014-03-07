@@ -104,26 +104,34 @@ public class PostgisReader implements DataReader {
 		Statement stmt = PostGisDBConnect.getConnection().createStatement();
 		ResultSet r = stmt.executeQuery(query);
 		while (r.next()) {
-			long id = (long) r.getObject(1);
-			long source = (long) r.getObject(2);
-			long target = (long) r.getObject(3);
-			double cost = (double) r.getObject(4);
+//			long id = (long) r.getObject(1);
+//			long source = (long) r.getObject(2);
+//			long target = (long) r.getObject(3);
+//			double cost = (double) r.getObject(4);
+			long id = (long) r.getLong(1);
+			long source = (long) r.getLong(2);
+			long target = (long) r.getLong(3);
+			double cost = (double) r.getDouble(4);
 			loadValuesIntoGraph(graph, id, String.valueOf(source), String.valueOf(target), cost);
 		}
 	}
 
-	private void loadValuesIntoGraph(Graph graph, long recordid, String sourceId, String targetId, double cost) {
+	private void loadValuesIntoGraph(Graph graph, long edgeId, String sourceId, String targetId, double cost) {
 		Vertex source = graph.getVertex(sourceId);
 		Vertex target = graph.getVertex(targetId);
 		if (source == null) {
-			source = new Vertex(recordid, sourceId);
+			source = new Vertex(sourceId);
 			graph.addVertex(source);
 		}
 		if (target == null) {
-			target = new Vertex(recordid, targetId);
+			target = new Vertex(targetId);
 			graph.addVertex(target);
 		}
-		Edge edge = new Edge(target, cost);
+		Edge edge = new Edge(edgeId, target, cost);
 		source.addEgde(edge);
+		
+		// bidirectional / undirected graph
+		edge = new Edge(edgeId, source, cost);
+		target.addEgde(edge);
 	}
 }
