@@ -8,6 +8,7 @@ import java.util.List;
 
 import model.Edge;
 import model.Graph;
+import model.NodeEdgeCost;
 import model.Vertex;
 
 import org.postgis.LineString;
@@ -100,14 +101,30 @@ public class PostgisReader implements DataReader {
 		return points;
 	}
 
+	public NodeEdgeCost getNodeEdgeCostForQuery(String query) {
+		NodeEdgeCost nodeEdgeCost = new NodeEdgeCost();
+		try {
+			Statement stmt = PostGisDBConnect.getConnection().createStatement();
+			ResultSet r = stmt.executeQuery(query);
+			if (r != null) {
+				while (r.next()) {
+					PGgeometry geom = (PGgeometry) r.getObject(2);
+					nodeEdgeCost.setSource(r.getLong(1));
+					nodeEdgeCost.setLineString((LineString) geom.getGeometry());
+					nodeEdgeCost.setTarget(r.getLong(3));
+
+				}
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return nodeEdgeCost;
+	}
+
 	private void getResultForQueryAndLoadValuesInGraph(Graph graph, String query) throws SQLException {
 		Statement stmt = PostGisDBConnect.getConnection().createStatement();
 		ResultSet r = stmt.executeQuery(query);
 		while (r.next()) {
-//			long id = (long) r.getObject(1);
-//			long source = (long) r.getObject(2);
-//			long target = (long) r.getObject(3);
-//			double cost = (double) r.getObject(4);
 			long id = (long) r.getLong(1);
 			long source = (long) r.getLong(2);
 			long target = (long) r.getLong(3);
@@ -129,7 +146,7 @@ public class PostgisReader implements DataReader {
 		}
 		Edge edge = new Edge(edgeId, target, cost);
 		source.addEgde(edge);
-		
+
 		// bidirectional / undirected graph
 		edge = new Edge(edgeId, source, cost);
 		target.addEgde(edge);

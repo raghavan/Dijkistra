@@ -8,6 +8,7 @@ import java.util.PriorityQueue;
 
 import model.Edge;
 import model.Graph;
+import model.NodeEdgeCost;
 import model.Vertex;
 
 import org.postgis.Point;
@@ -23,8 +24,8 @@ public class Dijkistra {
 	public static void main(String args[]) {
 
 		Dijkistra dijkistra = new Dijkistra();
-		String sourceId = dataReader.findNearestVertexIdFromGPS("-87.62383730163575","41.86792032502022");
-		String targetId = dataReader.findNearestVertexIdFromGPS("-87.61718542327881","41.878625501921995");
+		String sourceId = dataReader.findNearestVertexIdFromGPS("-87.65658170928955", "41.8676646570851");
+		String targetId = dataReader.findNearestVertexIdFromGPS("-87.60971815338135", "41.86187989679139");
 		// sourceId = "7";
 		// targetId = "595";
 		
@@ -37,12 +38,27 @@ public class Dijkistra {
 			if (vertex.getId().equals(sourceId)) // parent-edge based retrival, source don't have parent
 				continue;
 			
-			String query = "select the_geom from activity_linestrings_edge_table_noded where id = "
+			String query = "select source,the_geom,target from activity_linestrings_edge_table_noded where id = "
 					+ vertex.getParentEdge().getId();
 			
-			List<Point> points = dataReader.getResultForQueryFromLineString(query);
+			NodeEdgeCost nodeEdgeCost = dataReader.getNodeEdgeCostForQuery(query);
+			
+			List<Point> points = nodeEdgeCost.getPoints();
+			if (nodeEdgeCost.getTarget() != Long.parseLong(vertex.getId())) {
+				Collections.reverse(points);
+			}
 
 			dijkistra.printPathForBingMap(points);
+		}
+	}
+	
+
+	private void printFromPoints(List<Vertex> shortestPath) {
+		for (Vertex vertex : shortestPath) {
+			String query = "select the_geom from activity_linestrings_edge_table_noded_vertices_pgr where id = "
+					+ vertex.getId();
+			List<Point> points = dataReader.getResultForQueryFromPoint(query);
+			printPathForBingMap(points);
 		}
 	}
 

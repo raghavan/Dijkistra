@@ -1,14 +1,13 @@
 package datareader;
 
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.List;
-
-import org.postgis.Point;
 
 import model.Edge;
 import model.Graph;
+import model.NodeEdgeCost;
 import model.Vertex;
+
+import org.postgis.Point;
 
 public class MockDataReader implements DataReader {
 
@@ -56,15 +55,19 @@ public class MockDataReader implements DataReader {
 
 	}
 
-	public List<Point> getResultForQueryFromLineString(String query){
+	public List<Point> getResultForQueryFromLineString(String query) {
 		return null;
 	}
 
-	public List<Point> getResultForQueryFromPoint(String query){
+	public List<Point> getResultForQueryFromPoint(String query) {
 		return null;
 	}
-	
+
 	public String findNearestVertexIdFromGPS(String longitude, String latitude) {
+		return null;
+	}
+
+	public NodeEdgeCost getNodeEdgeCostForQuery(String query) {
 		return null;
 	}
 
