@@ -18,14 +18,37 @@ import datareader.PostgisReader;
 
 public class Dijkistra {
 
-	static DataReader dataReader = new PostgisReader();
-	static Graph graph = dataReader.readDataAndLoadGraph();
+	//static DataReader dataReader = new PostgisReader();
+	//static Graph graph = dataReader.readDataAndLoadGraph();
+	DataReader dataReader;
+	Graph graph;
+	
+	public Dijkistra(DataReader dr)
+	{
+		this.dataReader = dr;
+		this.graph = dataReader.readDataAndLoadGraph();
+	}
+	
+	public Dijkistra(Graph g)
+	{
+		graph = g;
+	}
 
 	public static void main(String args[]) {
 
-		Dijkistra dijkistra = new Dijkistra();
-		String sourceId = dataReader.findNearestVertexIdFromGPS("-87.65658170928955", "41.8676646570851");
-		String targetId = dataReader.findNearestVertexIdFromGPS("-87.60971815338135", "41.86187989679139");
+		System.out.println( Math.exp(-Double.MAX_VALUE) );
+		double d = -Math.log( Math.exp( -Double.MAX_VALUE) );
+		System.out.println(Math.log( Math.exp( -Double.MAX_VALUE) ));
+		System.out.println(Math.log( Math.exp( 4 -Double.MAX_VALUE) ));
+		System.out.println(Math.log( Math.exp( -4 -Double.MAX_VALUE) ));
+		System.out.println(Math.log( Math.exp( 4) + Math.exp( -Double.MAX_VALUE) ));
+		System.out.println(Math.log( Math.exp( -4) + Math.exp( -Double.MAX_VALUE) ));
+		System.out.println(Math.log( Math.exp( -4) + Math.exp( -d ) ));
+		
+		Dijkistra dijkistra = new Dijkistra(new PostgisReader());
+		
+		String sourceId = dijkistra.dataReader.findNearestVertexIdFromGPS("-87.65658170928955", "41.8676646570851");
+		String targetId = dijkistra.dataReader.findNearestVertexIdFromGPS("-87.60971815338135", "41.86187989679139");
 		// sourceId = "7";
 		// targetId = "595";
 		
@@ -41,7 +64,7 @@ public class Dijkistra {
 			String query = "select source,the_geom,target from activity_linestrings_edge_table_noded where id = "
 					+ vertex.getParentEdge().getId();
 			
-			NodeEdgeCost nodeEdgeCost = dataReader.getNodeEdgeCostForQuery(query);
+			NodeEdgeCost nodeEdgeCost = dijkistra.dataReader.getNodeEdgeCostForQuery(query);
 			
 			List<Point> points = nodeEdgeCost.getPoints();
 			if (nodeEdgeCost.getTarget() != Long.parseLong(vertex.getId())) {
@@ -69,7 +92,7 @@ public class Dijkistra {
 		}
 	}
 
-	private List<Vertex> findShortestPath(String sourceId, String targetId) {
+	public List<Vertex> findShortestPath(String sourceId, String targetId) {
 
 		List<Vertex> visitedVertices = new ArrayList<Vertex>();
 		Vertex source = graph.getVertex(sourceId);
