@@ -150,4 +150,12 @@ public class VertexSorter {
 		multiplier = factor;
 	}
 	
+	public double getDijkstrasDistanceFromSouce(String vertexId)
+	{
+		if (sourceDistance.containsKey(vertexId))
+			return sourceDistance.get(vertexId);
+		
+		return Double.MAX_VALUE; // infinity otherwise
+	}
+	
 }
