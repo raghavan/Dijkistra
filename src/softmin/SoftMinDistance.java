@@ -25,7 +25,7 @@ public class SoftMinDistance {
 		Vertex[] vertexList = vSorter.getSortedVertices();
 		
 		
-		// normalize to edge costs so that softmin does not go to -infinity
+		// add slacks to edge costs so that softmin converge
 		double minEdgeCost = Double.MAX_VALUE;
 		for (Vertex v: vertexList)
 		{
@@ -40,7 +40,8 @@ public class SoftMinDistance {
 		{
 			for (Edge e: v.getEgdes())
 			{
-				e.setCost(e.getCost() / minEdgeCost);
+				//e.setCost(e.getCost() / minEdgeCost);
+				e.setCost(e.getCost() + 100);//vertexList.length);
 			}
 		}
 		
@@ -71,28 +72,43 @@ public class SoftMinDistance {
 				v.setCostFromSource(0);
 			else v.setCostFromSource(Double.MAX_VALUE);
 
-		int w = 100;
-		while (w-- > 0)
-		for (Vertex v: vertices)
+		int w = 0;
+		double targetCost = g.getVertex(targetId).getCostFromSource();
+		while (w++ < 10000)
 		{
-			if (v.getId().equals(sourceId))
-				continue;
-			// edges are outgoing, 
-			// but since they are duplicated for undirected graph, 
-			// we can use this
-			for (Edge e: v.getEgdes()) 
+			for (Vertex v: vertices)
 			{
-				if (e.getCost() < 0 || e.getVertex().getCostFromSource() < 0)
-					System.out.println(v.getId() + " : " + e.getId() + " - " + e.getCost() + " : " + e.getVertex().getId() + " - " + e.getVertex().getCostFromSource() );
+				// in each new iteration a vertex excludes itself
+				if (v.getId().equals(sourceId))
+					v.setCostFromSource(0);
+				else 
+					v.setCostFromSource(Double.MAX_VALUE);
 
-				v.setCostFromSource(
-						softmin(
-								v.getCostFromSource(), 
-								e.getCost() + e.getVertex().getCostFromSource()
-								)
-						);
+				// edges are outgoing, 
+				// but since they are duplicated for undirected graph, 
+				// we can use this
+				for (Edge e: v.getEgdes()) 
+				{
+					v.setCostFromSource(
+							softmin(
+									v.getCostFromSource(), 
+									e.getCost() + e.getVertex().getCostFromSource()
+									)
+							);
+				}
+				
 			}
+			
+			// when to break;
+			if (Math.abs(
+					g.getVertex(targetId).getCostFromSource() - targetCost 
+					) < 0.0000001 )
+					break;
+			targetCost =g.getVertex(targetId).getCostFromSource();
 		}
+		
+		System.out.println("number of iterations to converge: " + w);
+		
 	}
 	
 	/**

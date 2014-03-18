@@ -76,7 +76,7 @@ public class VertexSorter {
 			sourceDistance.put(v, v.getCostFromSource());
 			
 			// now reset
-			if (v.getId().equals(targetId))
+			if (v.getId().equals(targetId)) // next iteration's source is the targetNode
 				v.setCostFromSource(0);
 			else v.setCostFromSource(Double.MAX_VALUE);
 		}
