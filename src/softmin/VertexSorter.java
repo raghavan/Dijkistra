@@ -128,15 +128,15 @@ public class VertexSorter {
 			v.setCostFromSource(s_d / (s_d + t_d));
 			sortedVertices.add(v);
 		}
+		
+		Comparator<Vertex> vertexComparator = new VertexComparator();
+		Collections.sort(sortedVertices, vertexComparator);
 	}
 	
 	public Vertex[] getSortedVertices()
 	{
 		if (sortedVertices.isEmpty())
 			sort();
-		
-		Comparator<Vertex> vertexComparator = new VertexComparator();
-		Collections.sort(sortedVertices, vertexComparator);
 		
 		return sortedVertices.toArray(new Vertex[0]);
 	}
@@ -152,9 +152,11 @@ public class VertexSorter {
 	
 	public double getDijkstrasDistanceFromSouce(String vertexId)
 	{
-		if (sourceDistance.containsKey(vertexId))
-			return sourceDistance.get(vertexId);
-		
+		Vertex vertex = new Vertex(vertexId);
+
+		if (sourceDistance.containsKey(vertex))
+				return sourceDistance.get(vertex);
+
 		return Double.MAX_VALUE; // infinity otherwise
 	}
 	

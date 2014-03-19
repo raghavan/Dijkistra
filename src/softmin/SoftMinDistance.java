@@ -22,6 +22,7 @@ public class SoftMinDistance {
 		
 		// sort the vertex list to perform softmin in order
 		VertexSorter vSorter = new VertexSorter(g, sourceId, targetId);
+		vSorter.setThresholdFactor(Double.MAX_VALUE); // i.e. no cut off 
 		Vertex[] vertexList = vSorter.getSortedVertices();
 		
 		
@@ -41,7 +42,7 @@ public class SoftMinDistance {
 			for (Edge e: v.getEgdes())
 			{
 				//e.setCost(e.getCost() / minEdgeCost);
-				e.setCost(e.getCost() + 100);//vertexList.length);
+				e.setCost(10 + e.getCost());//vertexList.length);
 			}
 		}
 		
@@ -55,11 +56,7 @@ public class SoftMinDistance {
 		for (int i=0; i<vertexList.length; i++)
 			System.out.println(vertexList[i].getId() + " " + vertexList[i].getCostFromSource());
 		
-		System.out.println(vertexList.length + " \n" + (1/minEdgeCost)
-				+ "\n" + vSorter.getDijkstrasDistanceFromSouce(targetId)
-				+ "\n" + vSorter.getDijkstrasDistanceFromSouce(sourceId)
-				);
-		
+		System.out.println(vertexList.length );
 		
 	}
 	
@@ -73,7 +70,7 @@ public class SoftMinDistance {
 			else v.setCostFromSource(Double.MAX_VALUE);
 
 		int w = 0;
-		double targetCost = g.getVertex(targetId).getCostFromSource();
+		double prevTargetCost = g.getVertex(targetId).getCostFromSource();
 		while (w++ < 10000)
 		{
 			for (Vertex v: vertices)
@@ -101,10 +98,10 @@ public class SoftMinDistance {
 			
 			// when to break;
 			if (Math.abs(
-					g.getVertex(targetId).getCostFromSource() - targetCost 
+					g.getVertex(targetId).getCostFromSource() - prevTargetCost 
 					) < 0.0000001 )
 					break;
-			targetCost =g.getVertex(targetId).getCostFromSource();
+			prevTargetCost =g.getVertex(targetId).getCostFromSource();
 		}
 		
 		System.out.println("number of iterations to converge: " + w);
