@@ -12,40 +12,43 @@ public class SoftMinDistance {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		// 
+		
+		// load the graph 
 		DataReader dr = new PostgisReader();
 		Graph g = dr.readDataAndLoadGraph();
 		
+		System.out.println("DEBUG: database loaded. #vertices " + g.getAllVertices().size());
+		
+		// pick source and target
 		String sourceId = dr.findNearestVertexIdFromGPS("-87.65658170928955", "41.8676646570851");
 		String targetId = dr.findNearestVertexIdFromGPS("-87.60971815338135", "41.86187989679139");
 		
+		double mc = Double.MAX_VALUE;
+		double xc = 0;
+		// add slacks to edge costs so that softmin converge
+		for (Vertex v: g.getAllVertices())
+		{
+			for (Edge e: v.getEgdes())
+			{
+				/**
+				 * Learn these constants!!!!
+				 */
+				e.setCost(0.10 + 10000000.0 * e.getCost());
+				if (e.getCost() < mc) mc = e.getCost();
+				if (e.getCost() > xc) xc = e.getCost();
+			}
+		}
+		
+		System.out.println("DEBUG: edge weight adjusted. new costs: min " 
+				+ mc + ", max " + xc);
 		
 		// sort the vertex list to perform softmin in order
 		VertexSorter vSorter = new VertexSorter(g, sourceId, targetId);
-		vSorter.setThresholdFactor(Double.MAX_VALUE); // i.e. no cut off 
+		//vSorter.setThresholdFactor(Double.MAX_VALUE); // i.e. no cut off
+		vSorter.setThresholdFactor(5); 
 		Vertex[] vertexList = vSorter.getSortedVertices();
-		
-		
-		// add slacks to edge costs so that softmin converge
-		double minEdgeCost = Double.MAX_VALUE;
-		for (Vertex v: vertexList)
-		{
-			for (Edge e: v.getEgdes())
-			{
-				if (minEdgeCost > e.getCost())
-					minEdgeCost = e.getCost();
-			}
-		}
-		
-		for (Vertex v: vertexList)
-		{
-			for (Edge e: v.getEgdes())
-			{
-				//e.setCost(e.getCost() / minEdgeCost);
-				e.setCost(10 + e.getCost());//vertexList.length);
-			}
-		}
-		
+
+		System.out.println("DEBUG: vertex list sorted. #vertices: " + vertexList.length);
 		
 		// compute softmin
 		SoftMinDistance smd = new SoftMinDistance();
@@ -56,7 +59,10 @@ public class SoftMinDistance {
 		for (int i=0; i<vertexList.length; i++)
 			System.out.println(vertexList[i].getId() + " " + vertexList[i].getCostFromSource());
 		
-		System.out.println(vertexList.length );
+		System.out.println("vertex list length: " + vertexList.length + " \n" 
+				+ "dijkstra's distance s-to-t: " + vSorter.getDijkstrasDistanceFromSouce(targetId) + "\n"
+				+ "minimum edge weight of the graph: " + mc +  "\n"
+				+ "maximum edge weight of the graph: " + xc);
 		
 	}
 	
@@ -71,8 +77,10 @@ public class SoftMinDistance {
 
 		int w = 0;
 		double prevTargetCost = g.getVertex(targetId).getCostFromSource();
-		while (w++ < 10000)
+		while (w++ < 15)
 		{
+			System.out.println("DEBUG: iteration " + w);
+			
 			for (Vertex v: vertices)
 			{
 				// in each new iteration a vertex excludes itself
@@ -99,7 +107,7 @@ public class SoftMinDistance {
 			// when to break;
 			if (Math.abs(
 					g.getVertex(targetId).getCostFromSource() - prevTargetCost 
-					) < 0.0000001 )
+					) < 0.0001 )
 					break;
 			prevTargetCost =g.getVertex(targetId).getCostFromSource();
 		}
