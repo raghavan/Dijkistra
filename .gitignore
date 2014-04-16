@@ -1,1 +1,7 @@
 /bin
+
+src/datareader/PostGisDBConnect.java
+
+*.txt
+
+META-INF/MANIFEST.MF
