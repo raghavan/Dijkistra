@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project default="create_run_jar" name="Create Runnable Jar for Project Dijkistra">
+    <!--this file was created by Eclipse Runnable JAR Export Wizard-->
+    <!--ANT 1.7 is required                                        -->
+    <target name="create_run_jar">
+        <jar destfile="/Users/raghavankl/Google Drive/git-projects/dijkistra/jartest/EdgeMerger.jar" filesetmanifest="mergewithoutmain">
+            <manifest>
+                <attribute name="Main-Class" value="mergeedges.EdgeMerger"/>
+                <attribute name="Class-Path" value="."/>
+            </manifest>
+            <fileset dir="/Users/raghavankl/Google Drive/git-projects/dijkistra/bin"/>
+            <zipfileset excludes="META-INF/*.SF" src="/Users/raghavankl/Google Drive/Academic-project-ML/PostGIS/postgis-jdbc-1.3.1.jar"/>
+            <zipfileset excludes="META-INF/*.SF" src="/Users/raghavankl/Google Drive/Academic-project-ML/PostGIS/postgresql.jar"/>
+            <zipfileset excludes="META-INF/*.SF" src="/Users/raghavankl/Softwares/jars/google-gson-2.2.4/gson-2.2.4.jar"/>
+        </jar>
+    </target>
+</project>
