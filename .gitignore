@@ -5,3 +5,7 @@ src/datareader/PostGisDBConnect.java
 *.txt
 
 META-INF/MANIFEST.MF
+
+src/datareader/PostGisDBConnect.java
+
+src/datareader/PostGisDBConnect.java

@@ -30,7 +30,7 @@ public class PostgisReader implements DataReader {
 	public Graph postGisDbReader() {
 		Graph graph = new Graph();
 
-		String query = "select id,source,target,cost_length from activity_linestrings_edge_table_noded where source != target;";
+		String query = "select id,source,target,cost_length_meters,edge_score from activity_linestrings_edge_table_noded where source != target;";
 		try {
 			getResultForQueryAndLoadValuesInGraph(graph, query);
 		} catch (SQLException e) {
@@ -129,11 +129,12 @@ public class PostgisReader implements DataReader {
 			long source = (long) r.getLong(2);
 			long target = (long) r.getLong(3);
 			double cost = (double) r.getDouble(4);
-			loadValuesIntoGraph(graph, id, String.valueOf(source), String.valueOf(target), cost);
+			double edge_score = (double) r.getDouble(5);
+			loadValuesIntoGraph(graph, id, String.valueOf(source), String.valueOf(target), cost,edge_score);
 		}
 	}
 
-	private void loadValuesIntoGraph(Graph graph, long edgeId, String sourceId, String targetId, double cost) {
+	private void loadValuesIntoGraph(Graph graph, long edgeId, String sourceId, String targetId, double cost, double edge_score) {
 		Vertex source = graph.getVertex(sourceId);
 		Vertex target = graph.getVertex(targetId);
 		if (source == null) {
@@ -144,11 +145,11 @@ public class PostgisReader implements DataReader {
 			target = new Vertex(targetId);
 			graph.addVertex(target);
 		}
-		Edge edge = new Edge(edgeId, target, cost);
+		Edge edge = new Edge(edgeId, target, cost, edge_score);
 		source.addEgde(edge);
 
 		// bidirectional / undirected graph
-		edge = new Edge(edgeId, source, cost);
+		edge = new Edge(edgeId, source, cost, edge_score);
 		target.addEgde(edge);
 	}
 }

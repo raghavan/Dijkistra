@@ -16,7 +16,7 @@ import java.util.TreeMap;
 public class EdgeMerger {
 
 	private static final String HAUSDORFF_DATA_FILE = "HausdorffDistance.txt";
-	private static final BigDecimal HAUSDORFF_SELECTION_THRESHOLD = new BigDecimal(0.0003);
+	private static final BigDecimal HAUSDORFF_SELECTION_THRESHOLD = new BigDecimal(0.1);
 
 	public static void main(String[] args) {
 
@@ -33,9 +33,9 @@ public class EdgeMerger {
 		for (Edge edge : edgesMap.values()) {
 			if (edge.getSimilarEdgeId() != -1) {
 				System.out.println("Update activity_linestrings_edge_table_noded set similar_to_edge = "
-						+ edge.getSimilarEdgeId() + " where id =" + edge.getId()+";");
-				
-				//System.out.println("Select id,source,target,cost_length from activity_linestrings_edge_table_noded where id in("+edge.getId()+","+edge.getSimilarEdgeId()+");");
+						+ edge.getSimilarEdgeId() + " where id =" + edge.getId() + ";");
+
+				// System.out.println("Select id,source,target,cost_length from activity_linestrings_edge_table_noded where id in("+edge.getId()+","+edge.getSimilarEdgeId()+");");
 			}
 		}
 
@@ -65,9 +65,11 @@ public class EdgeMerger {
 		long comparingEdgeId = sortedMap.firstKey();
 		for (Edge edge : edgesMap.values()) {
 			BigDecimal comparingEdgeHausdorffDist = edge.getHausdorffDistanceFromEdge(comparingEdgeId);
-			if (comparingEdgeHausdorffDist != null && comparingEdgeHausdorffDist.doubleValue() > 0
+			if (comparingEdgeHausdorffDist != null
 					&& comparingEdgeHausdorffDist.compareTo(HAUSDORFF_SELECTION_THRESHOLD) == -1) {
-				edge.setSimilarEdgeId(comparingEdgeId);
+				if (edge.getId() != comparingEdgeId) {
+					edge.setSimilarEdgeId(comparingEdgeId);
+				}
 			}
 		}
 
@@ -92,31 +94,35 @@ public class EdgeMerger {
 			while ((strLine = br.readLine()) != null) {
 				strLine = strLine.trim();
 				String data[] = strLine.split(" ");
-				if (Long.parseLong(data[0]) != Long.parseLong(data[1])) {
-					SourceTarget sourceTarget = new SourceTarget(Long.parseLong(data[2]), Long.parseLong(data[3]));
+				if (data.length == 5) {
+					if (Long.parseLong(data[0]) != Long.parseLong(data[1])) {
+						SourceTarget sourceTarget = new SourceTarget(Long.parseLong(data[2]), Long.parseLong(data[3]));
 
-					// From the main hashmap get the edgemap values if present
-					Map<Long, Edge> edgeMap = new HashMap<Long, Edge>();
-					if (sourceTargetWithEdgeMap.containsKey(sourceTarget)) {
-						edgeMap = sourceTargetWithEdgeMap.get(sourceTarget);
+						// From the main hashmap get the edgemap values if
+						// present
+						Map<Long, Edge> edgeMap = new HashMap<Long, Edge>();
+						if (sourceTargetWithEdgeMap.containsKey(sourceTarget)) {
+							edgeMap = sourceTargetWithEdgeMap.get(sourceTarget);
+						}
+
+						// From the edgemap get the corresponding edge if
+						// present
+						long primaryEdgeId = Long.parseLong(data[0]);
+						Edge edge = new Edge(primaryEdgeId);
+						if (edgeMap.containsKey(primaryEdgeId)) {
+							edge = edgeMap.get(primaryEdgeId);
+						}
+
+						// Load the comparingEdge with hausdorffDist in the edge
+						// object
+						BigDecimal hausdorffDist = new BigDecimal(data[4]);
+						EdgeWithHausdorffDist edgeWithHausdorffDist = new EdgeWithHausdorffDist(
+								Long.parseLong(data[1]), hausdorffDist);
+						edge.addEdgeWithHausdorffDistance(edgeWithHausdorffDist);
+						edgeMap.put(primaryEdgeId, edge);
+
+						sourceTargetWithEdgeMap.put(sourceTarget, edgeMap);
 					}
-
-					// From the edgemap get the corresponding edge if present
-					long primaryEdgeId = Long.parseLong(data[0]);
-					Edge edge = new Edge(primaryEdgeId);
-					if (edgeMap.containsKey(primaryEdgeId)) {
-						edge = edgeMap.get(primaryEdgeId);
-					}
-
-					// Load the comparingEdge with hausdorffDist in the edge
-					// object
-					BigDecimal hausdorffDist = new BigDecimal(data[4]);
-					EdgeWithHausdorffDist edgeWithHausdorffDist = new EdgeWithHausdorffDist(Long.parseLong(data[1]),
-							hausdorffDist);
-					edge.addEdgeWithHausdorffDistance(edgeWithHausdorffDist);
-					edgeMap.put(primaryEdgeId, edge);
-
-					sourceTargetWithEdgeMap.put(sourceTarget, edgeMap);
 				}
 			}
 		} catch (IOException e) {

@@ -5,15 +5,17 @@ public class Edge {
 	double cost;
 	Vertex targetVertex;
 	long id;
+	double edge_score;
 
 	public Edge() {
 
 	}
 
-	public Edge(long id, Vertex vertex, double cost) {
+	public Edge(long id, Vertex vertex, double cost, double edge_score) {
 		this.cost = cost;
 		this.targetVertex = vertex;
 		this.id = id;
+		this.edge_score = edge_score;
 	}
 
 	public double getCost() {
@@ -31,9 +33,17 @@ public class Edge {
 	public void setVertex(Vertex vertex) {
 		this.targetVertex = vertex;
 	}
-	
-	public long getId(){
+
+	public long getId() {
 		return id;
+	}
+		
+	public double getEdge_score() {
+		return edge_score;
+	}
+
+	public void setEdge_score(double edge_score) {
+		this.edge_score = edge_score;
 	}
 
 	@Override
