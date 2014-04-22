@@ -1,5 +1,9 @@
 package softmin;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import model.Edge;
 import model.Graph;
 import model.Vertex;
@@ -20,8 +24,8 @@ public class SoftMinDistance {
 		System.out.println("DEBUG: database loaded. #vertices " + g.getAllVertices().size());
 		
 		// pick source and target
-		String sourceId = dr.findNearestVertexIdFromGPS("-87.65658170928955", "41.8676646570851");
-		String targetId = dr.findNearestVertexIdFromGPS("-87.60971815338135", "41.86187989679139");
+		String sourceId = dr.findNearestVertexIdFromGPS("-87.62416308389537","41.8729892514973");
+		String targetId = dr.findNearestVertexIdFromGPS("-87.62034361825816","41.87324489813714");
 		
 		double mc = Double.MAX_VALUE;
 		double xc = 0;
@@ -33,7 +37,7 @@ public class SoftMinDistance {
 				/**
 				 * Learn these constants!!!!
 				 */
-				e.setCost(0.10 + 10000000.0 * e.getCost());
+				e.setCost(0.0000000010 + 10000000.0 * e.getCost());
 				if (e.getCost() < mc) mc = e.getCost();
 				if (e.getCost() > xc) xc = e.getCost();
 			}
@@ -58,6 +62,8 @@ public class SoftMinDistance {
 		System.out.println("---");
 		for (int i=0; i<vertexList.length; i++)
 			System.out.println(vertexList[i].getId() + " " + vertexList[i].getCostFromSource());
+		
+		((PostgisReader)dr).printVertexPoints(Arrays.asList(vertexList));
 		
 		System.out.println("vertex list length: " + vertexList.length + " \n" 
 				+ "dijkstra's distance s-to-t: " + vSorter.getDijkstrasDistanceFromSouce(targetId) + "\n"
@@ -90,14 +96,16 @@ public class SoftMinDistance {
 					v.setCostFromSource(Double.MAX_VALUE);
 
 				// edges are outgoing, 
-				// but since they are duplicated for undirected graph, 
-				// we can use this
 				for (Edge e: v.getEgdes()) 
 				{
 					v.setCostFromSource(
 							softmin(
 									v.getCostFromSource(), 
-									e.getCost() + e.getVertex().getCostFromSource()
+									e.getCost() 
+									+ (v == e.getSourceVertex() 
+										? e.getTargetVertex().getCostFromSource() 
+										: e.getSourceVertex().getCostFromSource()
+										)
 									)
 							);
 				}
@@ -107,7 +115,7 @@ public class SoftMinDistance {
 			// when to break;
 			if (Math.abs(
 					g.getVertex(targetId).getCostFromSource() - prevTargetCost 
-					) < 0.0001 )
+					) < 0.00000001 )
 					break;
 			prevTargetCost =g.getVertex(targetId).getCostFromSource();
 		}

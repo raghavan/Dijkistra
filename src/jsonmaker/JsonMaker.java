@@ -28,7 +28,7 @@ public class JsonMaker {
 			for(Edge edge : vertex.getEgdes()){
 				NodeDetail nodeDetail = new NodeDetail();
 				nodeDetail.setNodeFrom(vertex.getId());
-				nodeDetail.setNodeTo(edge.getVertex().getId());	
+				nodeDetail.setNodeTo(edge.getTargetVertex().getId());	
 				adjacency.addNodeDetails(nodeDetail);
 			}
 			Gson gson = new Gson();

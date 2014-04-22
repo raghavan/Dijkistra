@@ -40,6 +40,55 @@ public class PostgisReader implements DataReader {
 		return graph;
 	}
 
+	
+	/**
+	 * Loads the complete activity_linestrings_edge_table_noded
+	 * @return
+	 */
+	public Graph loadAllEdgesIntoGraph() {
+		Graph graph = new Graph();
+
+		String query = "select id, old_id, sub_id, source, target, the_geom, cost_length_meters, edge_score" 
+				+ " from activity_linestrings_edge_table_noded" 
+				//+ " WHERE similar_to_edge = 0;"
+				;
+		
+		loadEdgeRecordsIntoGraph(graph, query);
+		
+		return graph;
+	}
+	
+	
+	
+	/**
+	 * loads all columns of edge table into the supplied graph
+	 * @param graph
+	 * @param query to get the edges
+	 */
+	public void loadEdgeRecordsIntoGraph(Graph graph, String query) {
+		try {
+			Statement stmt = PostGisDBConnect.getConnection().createStatement();
+			ResultSet r = stmt.executeQuery(query);
+			while (r.next()) {
+				
+				long id = (long) r.getLong(1);
+				int oldId = (int) r.getInt(2);
+				int subId = (int) r.getInt(3);
+				long source = (long) r.getLong(4);
+				long target = (long) r.getLong(5);
+				LineString lineString = (LineString) ((PGgeometry) r.getObject(6)).getGeometry();
+				double cost = (double) r.getDouble(7);
+				double edge_score = (double) r.getDouble(8);
+				
+				loadValuesIntoGraph(graph, id, String.valueOf(source), String.valueOf(target), cost,
+						oldId, subId, lineString, edge_score);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+
+
 	public String findNearestVertexIdFromGPS(String longitude, String latitude) {
 
 		String vertexId = null;
@@ -134,7 +183,31 @@ public class PostgisReader implements DataReader {
 		}
 	}
 
+//	private void loadValuesIntoGraph(Graph graph, long edgeId, String sourceId, String targetId, double cost, double edge_score) {
+//		Vertex source = graph.getVertex(sourceId);
+//		Vertex target = graph.getVertex(targetId);
+//		if (source == null) {
+//			source = new Vertex(sourceId);
+//			graph.addVertex(source);
+//		}
+//		if (target == null) {
+//			target = new Vertex(targetId);
+//			graph.addVertex(target);
+//		}
+//		Edge edge = new Edge(edgeId, target, cost, edge_score);
+//		source.addEgde(edge);
+//
+//		// bidirectional / undirected graph
+//		edge = new Edge(edgeId, source, cost, edge_score);
+//		target.addEgde(edge);
+//	}
+
 	private void loadValuesIntoGraph(Graph graph, long edgeId, String sourceId, String targetId, double cost, double edge_score) {
+		loadValuesIntoGraph(graph, edgeId, sourceId, targetId, cost, -1, -1, null, edge_score);
+	}
+	
+	private void loadValuesIntoGraph(Graph graph, long edgeId, String sourceId, String targetId, double cost,
+			int oldId, int subId, LineString lineString, double edge_score) {
 		Vertex source = graph.getVertex(sourceId);
 		Vertex target = graph.getVertex(targetId);
 		if (source == null) {
@@ -145,11 +218,28 @@ public class PostgisReader implements DataReader {
 			target = new Vertex(targetId);
 			graph.addVertex(target);
 		}
-		Edge edge = new Edge(edgeId, target, cost, edge_score);
+		Edge edge = new Edge(edgeId, source, target, cost, edge_score);
 		source.addEgde(edge);
-
-		// bidirectional / undirected graph
-		edge = new Edge(edgeId, source, cost, edge_score);
-		target.addEgde(edge);
+		if (source != target) // loops 
+			target.addEgde(edge);
+		
+		edge.setOldId(oldId);
+		edge.setSubId(subId);
+		edge.setLineString(lineString);
 	}
+	
+	
+	public void printVertexPoints(List<Vertex> vertices) {
+		for (Vertex vertex : vertices) {
+			String query = "select the_geom from activity_linestrings_edge_table_noded_vertices_pgr where id = "
+					+ vertex.getId();
+			List<Point> points = getResultForQueryFromPoint(query);
+			for (Point point: points )
+				System.out.println("points.push(\"" + point.getY() + "," +
+						point.getX() + "\");");
+			if (points.size() > 1)
+				System.err.println("INFO: multiple gps for vertex-id: " + vertex.getId());
+		}
+	}
+
 }

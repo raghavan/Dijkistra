@@ -76,14 +76,6 @@ public class Dijkistra {
 	}
 	
 
-	private void printFromPoints(List<Vertex> shortestPath) {
-		for (Vertex vertex : shortestPath) {
-			String query = "select the_geom from activity_linestrings_edge_table_noded_vertices_pgr where id = "
-					+ vertex.getId();
-			List<Point> points = dataReader.getResultForQueryFromPoint(query);
-			printPathForBingMap(points);
-		}
-	}
 
 	private void printPathForBingMap(List<Point> points) {
 		for (Point point : points) {
@@ -107,7 +99,11 @@ public class Dijkistra {
 		Vertex currentNode = vertexQueue.poll();
 		while (currentNode != null && currentNode != target) {
 			for (Edge edge : currentNode.getEgdes()) {
-				Vertex child = edge.getVertex();
+				
+				Vertex child = edge.getTargetVertex();
+				// bi-directional and edge stored source and target
+				if (child == currentNode) child = edge.getSourceVertex();
+				
 				double edgeCost = edge.getCost();
 				if (!visitedVertices.contains(child)) {
 

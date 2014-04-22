@@ -37,8 +37,13 @@ public class Vertex {
 		this.edges = edges;
 	}
 
+	/**
+	 * Skips duplicate edge
+	 * @param edge
+	 */
 	public void addEgde(Edge edge) {
-		this.edges.add(edge);
+		if (!edges.contains(edge))
+			this.edges.add(edge);
 	}
 
 	public double getCostFromSource() {

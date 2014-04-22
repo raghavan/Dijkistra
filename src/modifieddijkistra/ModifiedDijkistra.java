@@ -107,7 +107,7 @@ public class ModifiedDijkistra {
 		Vertex currentNode = vertexQueue.poll();
 		while (currentNode != null && currentNode != target) {
 			for (Edge edge : currentNode.getEgdes()) {
-				Vertex child = edge.getVertex();
+				Vertex child = edge.getTargetVertex();
 				double edgeCost = edge.getCost();
 				if (!visitedVertices.contains(child)) {
 
